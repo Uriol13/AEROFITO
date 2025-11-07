@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Aeroponía</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f6fa;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+    h1 {
+      text-align: center;
+      color: #2b5fab;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+    .label {
+      font-size: 14px;
+      color: gray;
+    }
+    .value {
+      font-size: 22px;
+      font-weight: bold;
+    }
+    button {
+      margin: 4px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #2b5fab;
+      color: white;
+    }
+    button:hover {
+      background: #1f4781;
+    }
+    canvas {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌱 Dashboard Aeroponía</h1>
+
+  <div class="grid">
+    <div class="card"><div class="label">Temperatura (°C)</div><div id="temp" class="value">--</div></div>
+    <div class="card"><div class="label">Humedad Aire (%)</div><div id="hum" class="value">--</div></div>
+    <div class="card"><div class="label">Humedad Suelo</div><div id="humSuelo" class="value">--</div></div>
+    <div class="card"><div class="label">Luz (LDR)</div><div id="luz" class="value">--</div></div>
+    <div class="card"><div class="label">Nivel de Agua</div><div id="nivel" class="value">--</div></div>
+    <div class="card"><div class="label">Modo</div><div id="modo" class="value">--</div></div>
+  </div>
+
+  <div style="text-align:center; margin-bottom:20px;">
+    <button onclick="enviarComando('MODO_AUTO')">MODO AUTO</button>
+    <button onclick="enviarComando('MODO_MANUAL')">MODO MANUAL</button>
+    <button onclick="enviarComando('LED_ON')">LED ON</button>
+    <button onclick="enviarComando('LED_OFF')">LED OFF</button>
+    <button onclick="enviarComando('HUMI_ON')">HUMI ON</button>
+    <button onclick="enviarComando('HUMI_OFF')">HUMI OFF</button>
+    <button onclick="enviarComando('BUZZER_ON')">BUZZER ON</button>
+    <button onclick="enviarComando('BUZZER_OFF')">BUZZER OFF</button>
+  </div>
+
+  <canvas id="chart" height="120"></canvas>
+
+  <script>
+    // --- CONFIG MQTT ---
+    const broker = "wss://18fb7bbbdae64144894d744ef6032fd6.s1.eu.hivemq.cloud:8884/mqtt";
+    const options = {
+      username: "AliUr",
+      password: "Kira#Cr7",
+      clean: true,
+      reconnectPeriod: 4000,
+      connectTimeout: 5000
+    };
+
+    const topicDatos = "aeroponia/datos";
+    const topicComandos = "aeroponia/comandos";
+
+    const client = mqtt.connect(broker, options);
+
+    client.on("connect", () => {
+      console.log("✅ Conectado a HiveMQ WebSocket");
+      client.subscribe(topicDatos);
+    });
+
+    client.on("error", (err) => console.error("❌ Error MQTT:", err));
+
+    // --- ELEMENTOS DOM ---
+    const el = (id) => document.getElementById(id);
+
+    // --- GRÁFICO ---
+    const ctx = document.getElementById("chart").getContext("2d");
+    const chartData = {
+      labels: [],
+      datasets: [
+        { label: "Temp (°C)", data: [], borderColor: "#FF5733", fill: false },
+        { label: "Hum (%)", data: [], borderColor: "#33C1FF", fill: false },
+        { label: "Hum Suelo", data: [], borderColor: "#33FF77", fill: false },
+        { label: "Nivel Agua", data: [], borderColor: "#FF33A8", fill: false }
+      ]
+    };
+    const chart = new Chart(ctx, {
+      type: "line",
+      data: chartData,
+      options: {
+        responsive: true,
+        animation: false,
+        scales: {
+          x: { title: { display: true, text: "Hora" } },
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // --- FUNCIÓN PARA ENVIAR COMANDOS ---
+    function enviarComando(comando) {
+      if (client.connected) {
+        client.publish(topicComandos, comando);
+        console.log("➡️ Comando enviado:", comando);
+      } else {
+        console.warn("⚠️ Cliente MQTT no conectado aún.");
+      }
+    }
+
+    // --- RECIBIR DATOS ---
+    client.on("message", (topic, message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        el("temp").innerText = data.temp ?? "--";
+        el("hum").innerText = data.hum ?? "--";
+        el("humSuelo").innerText = data.humSuelo ?? "--";
+        el("luz").innerText = data.luz ?? "--";
+        el("nivel").innerText = data.nivelAgua ?? "--";
+        el("modo").innerText = data.modo ?? "--";
+
+        // Actualizar gráfico
+        const hora = new Date().toLocaleTimeString();
+        const maxPoints = 20;
+
+        chartData.labels.push(hora);
+        chartData.datasets[0].data.push(data.temp ?? 0);
+        chartData.datasets[1].data.push(data.hum ?? 0);
+        chartData.datasets[2].data.push(data.humSuelo ?? 0);
+        chartData.datasets[3].data.push(data.nivelAgua ?? 0);
+
+        // Mantener solo los últimos 20 puntos
+        if (chartData.labels.length > maxPoints) {
+          chartData.labels.shift();
+          chartData.datasets.forEach(ds => ds.data.shift());
+        }
+
+        chart.update();
+      } catch (err) {
+        console.error("❌ Error parseando datos:", err);
+      }
+    });
+  </script>
+</body>
+</html>
