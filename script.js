@@ -21,8 +21,11 @@ client.on("error", (err) => console.error("❌ Error MQTT:", err));
 
 const el = (id) => document.getElementById(id);
 
+// ===============================
+//   CONFIGURACIÓN DE GRÁFICOS
+// ===============================
 const sensores = {
-  // Temperatura - Circular
+  // 🌡️ Temperatura
   temp: new Chart(document.getElementById("chartTemp"), {
     type: "doughnut",
     data: {
@@ -37,14 +40,11 @@ const sensores = {
       ],
     },
     options: {
-      plugins: {
-        tooltip: { enabled: false },
-        legend: { display: false },
-      },
+      plugins: { tooltip: { enabled: false }, legend: { display: false } },
     },
   }),
 
-  // Humedad Aire - Barras
+  // 💧 Humedad Aire
   hum: new Chart(document.getElementById("chartHum"), {
     type: "bar",
     data: {
@@ -64,7 +64,7 @@ const sensores = {
     },
   }),
 
-  // Humedad Suelo - Línea Suave
+  // 🌱 Humedad Suelo
   humSuelo: new Chart(document.getElementById("chartHumSuelo"), {
     type: "line",
     data: {
@@ -85,7 +85,7 @@ const sensores = {
     },
   }),
 
-  // Luz - Indicador tipo gauge
+  // 💡 Luz (LDR) — Gauge dinámico
   luz: new Chart(document.getElementById("chartLuz"), {
     type: "doughnut",
     data: {
@@ -107,7 +107,7 @@ const sensores = {
     },
   }),
 
-  // Nivel de Agua - Gauge simulado (doughnut parcial)
+  // 💧 Nivel de Agua
   nivel: new Chart(document.getElementById("chartNivel"), {
     type: "doughnut",
     data: {
@@ -132,18 +132,26 @@ const sensores = {
   }),
 };
 
+// ===============================
+//   ACTUALIZACIÓN DE GRÁFICOS
+// ===============================
 function actualizarGrafico(chart, valor) {
   if (chart.config.type === "doughnut") {
-    // Para temperatura o nivel (gauge)
-    const max = 100;
-    chart.data.datasets[0].data = [valor ?? 0, max - (valor ?? 0)];
-  } else if (chart.config.type === "radar") {
-    // Para luz (simulamos variación)
-    chart.data.datasets[0].data = Array(5)
-      .fill(0)
-      .map(() => (valor ?? 0) + Math.random() * 10 - 5);
-  } else {
-    // Para los demás (líneas, barras)
+    const esLuz = chart.canvas.id === "chartLuz";
+    const max = esLuz ? 1023 : 100;
+    const porcentaje = Math.min((valor ?? 0) / max * 100, 100);
+
+    // 🔆 Color dinámico para la luz
+    let colorPrincipal = "#ffb833";
+    if (esLuz) {
+      const intensidad = Math.floor((porcentaje / 100) * 255);
+      colorPrincipal = `rgb(255, ${180 + intensidad / 2}, ${50 + intensidad / 4})`;
+    }
+
+    chart.data.datasets[0].data = [porcentaje, 100 - porcentaje];
+    chart.data.datasets[0].backgroundColor = [colorPrincipal, "#eee"];
+  } 
+  else {
     const hora = new Date().toLocaleTimeString();
     chart.data.labels.push(hora);
     chart.data.datasets[0].data.push(valor ?? 0);
@@ -152,9 +160,13 @@ function actualizarGrafico(chart, valor) {
       chart.data.datasets[0].data.shift();
     }
   }
+
   chart.update();
 }
 
+// ===============================
+//   ENVÍO DE COMANDOS
+// ===============================
 function enviarComando(comando) {
   if (client.connected) {
     client.publish(topicComandos, comando);
@@ -164,6 +176,9 @@ function enviarComando(comando) {
   }
 }
 
+// ===============================
+//   RECEPCIÓN DE DATOS MQTT
+// ===============================
 client.on("message", (topic, message) => {
   try {
     const data = JSON.parse(message.toString());
