@@ -21,7 +21,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 20px;
-  height: 100px;
+  height: 90px;
   border-bottom: 4px solid #000;
   position: relative;
   border-radius: 5px;
@@ -146,3 +146,4 @@ canvas {
   width: 100% !important;
   height: 160px !important;
 }
+
