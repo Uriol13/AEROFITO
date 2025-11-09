@@ -85,23 +85,25 @@ const sensores = {
     },
   }),
 
-  // Luz - Radar
+  // Luz - Indicador tipo gauge
   luz: new Chart(document.getElementById("chartLuz"), {
-    type: "radar",
+    type: "doughnut",
     data: {
-      labels: ["Sensor 1", "Sensor 2", "Sensor 3", "Sensor 4", "Sensor 5"],
+      labels: ["Luz (LDR)", "Resto"],
       datasets: [
         {
-          label: "Luz (LDR)",
-          backgroundColor: "rgba(255, 184, 51, 0.3)",
-          borderColor: "#ffb833",
-          data: [0, 0, 0, 0, 0],
+          data: [0, 100],
+          backgroundColor: ["#ffb833", "#eee"],
+          borderWidth: 0,
+          cutout: "70%",
         },
       ],
     },
     options: {
-      scales: { r: { beginAtZero: true, max: 100 } },
-      elements: { line: { tension: 0.3 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+      },
     },
   }),
 
