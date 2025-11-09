@@ -3,213 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Aerofito</title>
+  <title>AeroFito</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: #e9f2f1;
-      margin: 0;
-      padding: 20px;
-      color: #222;
-    }
-    h1 {
-      text-align: center;
-      color: #2c5d5b;
-      margin-bottom: 30px;
-    }
-    .sensor-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-    .sensor-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      text-align: center;
-    }
-    .label {
-      font-size: 16px;
-      color: #666;
-      margin-bottom: 5px;
-    }
-    .value {
-      font-size: 26px;
-      font-weight: bold;
-      color: #2b5fab;
-      margin-bottom: 15px;
-    }
-    .controls {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-    button {
-      margin: 6px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background-color: #2b8a6d;
-      color: white;
-      font-weight: bold;
-      transition: 0.2s;
-    }
-    button:hover {
-      background-color: #246c56;
-    }
-    canvas {
-      width: 100% !important;
-      height: 180px !important;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🌱 AEROFITO</h1>
+  <header id="top">
+    <img id="logoA" src="img/logoaeroponia.png" alt="logo" width="80">
+    <h1>AeroFito</h1>
+  </header>
 
-  <div class="sensor-container">
-    <div class="sensor-card">
-      <div class="label">Temperatura (°C)</div>
-      <div id="temp" class="value">--</div>
-      <canvas id="chartTemp"></canvas>
-    </div>
-    <div class="sensor-card">
-      <div class="label">Humedad Aire (%)</div>
-      <div id="hum" class="value">--</div>
-      <canvas id="chartHum"></canvas>
-    </div>
-    <div class="sensor-card">
-      <div class="label">Humedad Suelo (%)</div>
-      <div id="humSuelo" class="value">--</div>
-      <canvas id="chartHumSuelo"></canvas>
-    </div>
-    <div class="sensor-card">
-      <div class="label">Luz (LDR)</div>
-      <div id="luz" class="value">--</div>
-      <canvas id="chartLuz"></canvas>
-    </div>
-    <div class="sensor-card">
-      <div class="label">Nivel de Agua</div>
-      <div id="nivel" class="value">--</div>
-      <canvas id="chartNivel"></canvas>
-    </div>
-  </div>
+  <main class="main-container">
+    <section class="controls">
+      <h2>Controles</h2>
+      <hr>
 
-  <div class="controls">
-    <h2>Controles Manuales</h2>
-    <div>
-      <button onclick="enviarComando('MODO_AUTO')">Modo Auto</button>
-      <button onclick="enviarComando('MODO_MANUAL')">Modo Manual</button>
-    </div>
-    <div style="margin-top: 10px;">
-      <button onclick="enviarComando('LED_ON')">LED ON</button>
-      <button onclick="enviarComando('LED_OFF')">LED OFF</button>
-      <button onclick="enviarComando('HUMI_ON')">HUMI ON</button>
-      <button onclick="enviarComando('HUMI_OFF')">HUMI OFF</button>
-      <button onclick="enviarComando('BUZZER_ON')">BUZZER ON</button>
-      <button onclick="enviarComando('BUZZER_OFF')">BUZZER OFF</button>
-    </div>
-    <div style="margin-top: 15px;">
-      <strong>Modo actual:</strong> <span id="modo">--</span>
-    </div>
-  </div>
+      <h3>Modo</h3>
+      <p>Seleccione el modo de operación del sistema:</p>
+      <div class="bloquesControl">
+        <button class="btn-green" onclick="enviarComando('MODO_AUTO')">AUTO</button>
+        <button class="btn-yellow" onclick="enviarComando('MODO_MANUAL')">MANUAL</button>
+      </div>
 
-  <script>
-    const broker = "wss://18fb7bbbdae64144894d744ef6032fd6.s1.eu.hivemq.cloud:8884/mqtt";
-    const options = {
-      username: "AliUr",
-      password: "Kira#Cr7",
-      clean: true,
-      reconnectPeriod: 4000,
-      connectTimeout: 5000
-    };
+      <hr>
+      <h3>Actuadores</h3>
+      <p>En modo manual puede activar o desactivar los actuadores.</p>
 
-    const topicDatos = "aeroponia/datos";
-    const topicComandos = "aeroponia/comandos";
+      <div class="actuadores">
+        <div class="bloquesControl">
+          <img class="imgAct" src="img/led.png" alt="led">
+          <div>
+            <h4>LED</h4>
+            <button class="btn-green" onclick="enviarComando('LED_ON')">ON</button>
+            <button class="btn-red" onclick="enviarComando('LED_OFF')">OFF</button>
+          </div>
+        </div>
 
-    const client = mqtt.connect(broker, options);
-    client.on("connect", () => {
-      console.log("✅ Conectado a HiveMQ WebSocket");
-      client.subscribe(topicDatos);
-    });
+        <div class="bloquesControl">
+          <img class="imgAct" src="img/humidificador.png" alt="humidificador">
+          <div>
+            <h4>HUMIDIFICADOR</h4>
+            <button class="btn-green" onclick="enviarComando('HUMI_ON')">ON</button>
+            <button class="btn-red" onclick="enviarComando('HUMI_OFF')">OFF</button>
+          </div>
+        </div>
 
-    client.on("error", (err) => console.error("❌ Error MQTT:", err));
+        <div class="bloquesControl">
+          <img class="imgAct" src="img/buzzer.png" alt="buzzer">
+          <div>
+            <h4>BUZZER</h4>
+            <button class="btn-green" onclick="enviarComando('BUZZER_ON')">ON</button>
+            <button class="btn-red" onclick="enviarComando('BUZZER_OFF')">OFF</button>
+          </div>
+        </div>
+      </div>
 
-    const el = (id) => document.getElementById(id);
+      <div class="modo-actual">
+        <strong>Modo actual:</strong> <span id="modo">--</span>
+      </div>
+    </section>
 
-    const sensores = {
-      temp: new Chart(document.getElementById("chartTemp"), {
-        type: "line",
-        data: { labels: [], datasets: [{ label: "Temperatura", borderColor: "#ff5733", data: [] }] },
-        options: { animation: false, scales: { y: { beginAtZero: true } } }
-      }),
-      hum: new Chart(document.getElementById("chartHum"), {
-        type: "bar",
-        data: { labels: [], datasets: [{ label: "Humedad Aire", backgroundColor: "#33c1ff", data: [] }] },
-        options: { animation: false, scales: { y: { beginAtZero: true } } }
-      }),
-      humSuelo: new Chart(document.getElementById("chartHumSuelo"), {
-        type: "line",
-        data: { labels: [], datasets: [{ label: "Humedad Suelo", borderColor: "#33ff77", data: [] }] },
-        options: { animation: false, scales: { y: { beginAtZero: true } } }
-      }),
-      luz: new Chart(document.getElementById("chartLuz"), {
-        type: "bar",
-        data: { labels: [], datasets: [{ label: "Luz (LDR)", backgroundColor: "#ffb833", data: [] }] },
-        options: { animation: false, scales: { y: { beginAtZero: true } } }
-      }),
-      nivel: new Chart(document.getElementById("chartNivel"), {
-        type: "line",
-        data: { labels: [], datasets: [{ label: "Nivel de Agua", borderColor: "#5d33ff", data: [] }] },
-        options: { animation: false, scales: { y: { beginAtZero: true } } }
-      })
-    };
+    <section class="contenido">
+      <div id="descripcion">
+        <p class="textdesc">
+          “AeroFito” es un proyecto que aplica tecnología a la agricultura mediante un sistema de aeroponía automatizada para optimizar el cultivo.
+        </p>
+        <p class="textdesc">
+          A continuación se muestran los valores actuales de los sensores activos.
+        </p>
+      </div>
 
-    function actualizarGrafico(chart, valor) {
-      const hora = new Date().toLocaleTimeString();
-      chart.data.labels.push(hora);
-      chart.data.datasets[0].data.push(valor ?? 0);
-      if (chart.data.labels.length > 15) {
-        chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
-      }
-      chart.update();
-    }
+      <h2 id="monitoreo">Monitoreo de Sensores</h2>
 
-    function enviarComando(comando) {
-      if (client.connected) {
-        client.publish(topicComandos, comando);
-        console.log("➡️ Enviado:", comando);
-      } else {
-        console.warn("⚠️ No conectado aún.");
-      }
-    }
+      <div class="sensor-container">
+        <div class="sensor-card">
+          <div class="label">Temperatura (°C)</div>
+          <div id="temp" class="value">--</div>
+          <canvas id="chartTemp"></canvas>
+        </div>
+        <div class="sensor-card">
+          <div class="label">Humedad Aire (%)</div>
+          <div id="hum" class="value">--</div>
+          <canvas id="chartHum"></canvas>
+        </div>
+        <div class="sensor-card">
+          <div class="label">Humedad Suelo (%)</div>
+          <div id="humSuelo" class="value">--</div>
+          <canvas id="chartHumSuelo"></canvas>
+        </div>
+        <div class="sensor-card">
+          <div class="label">Luz (LDR)</div>
+          <div id="luz" class="value">--</div>
+          <canvas id="chartLuz"></canvas>
+        </div>
+        <div class="sensor-card">
+          <div class="label">Nivel de Agua</div>
+          <div id="nivel" class="value">--</div>
+          <canvas id="chartNivel"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
 
-    client.on("message", (topic, message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        el("temp").innerText = data.temp ?? "--";
-        el("hum").innerText = data.hum ?? "--";
-        el("humSuelo").innerText = data.humSuelo ?? "--";
-        el("luz").innerText = data.luz ?? "--";
-        el("nivel").innerText = data.nivelAgua ?? "--";
-        el("modo").innerText = data.modo ?? "--";
-
-        actualizarGrafico(sensores.temp, data.temp);
-        actualizarGrafico(sensores.hum, data.hum);
-        actualizarGrafico(sensores.humSuelo, data.humSuelo);
-        actualizarGrafico(sensores.luz, data.luz);
-        actualizarGrafico(sensores.nivel, data.nivelAgua);
-      } catch (e) {
-        console.error("❌ Error procesando datos:", e);
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
