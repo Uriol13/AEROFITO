@@ -1,7 +1,7 @@
-const broker = "wss://18fb7bbbdae64144894d744ef6032fd6.s1.eu.hivemq.cloud:8884/mqtt";
+const broker = "wss://208550f4a0cc459581fea794110e503c.s1.eu.hivemq.cloud/";
 const options = {
-  username: "AliUr",
-  password: "Kira#Cr7",
+  username: "Eiton",
+  password: "2048Agro",
   clean: true,
   reconnectPeriod: 4000,
   connectTimeout: 5000
@@ -198,3 +198,4 @@ client.on("message", (topic, message) => {
     console.error("❌ Error procesando datos:", e);
   }
 });
+
