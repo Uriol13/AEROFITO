@@ -1,4 +1,4 @@
-const broker = "wss://208550f4a0cc459581fea794110e503c.s1.eu.hivemq.cloud/";
+const broker = "wss://208550f4a0cc459581fea794110e503c.s1.eu.hivemq.cloud/:8884/mqtt";
 const options = {
   username: "Eiton",
   password: "2048Agro",
@@ -198,4 +198,5 @@ client.on("message", (topic, message) => {
     console.error("❌ Error procesando datos:", e);
   }
 });
+
 
