@@ -21,10 +21,15 @@
 
       <h3>Modo</h3>
       <p>Seleccione el modo de operación del sistema:</p>
-      <div class="bloquesControl">
-        <button class="btn-green" onclick="enviarComando('MODO_AUTO')">AUTO</button>
-        <button class="btn-yellow" onclick="enviarComando('MODO_MANUAL')">MANUAL</button>
+      <div class="bloquesControl" id="grupoModo">
+        <button class="btn-green" onclick="activarBoton(this, 'grupoModo');enviarComando('MODO_AUTO')">AUTO</button>
+        <button id=btnManual class="btn-yellow" onclick="activarBoton(this, 'grupoModo');enviarComando('MODO_MANUAL');">MANUAL</button>
       </div>
+      <div class="modo-actual">
+        <strong>Modo actual:</strong> <span id="modo">--</span>
+      </div>
+
+
 
       <hr>
       <h3>Actuadores</h3>
@@ -33,35 +38,45 @@
       <div class="actuadores">
         <div class="bloquesControl">
           <img class="imgAct" src="img/led.png" alt="led">
-          <div>
+          <div id="grupoLed">
             <h4>LED</h4>
-            <button class="btn-green" onclick="enviarComando('LED_ON')">ON</button>
-            <button class="btn-red" onclick="enviarComando('LED_OFF')">OFF</button>
+            <button class="btn-green" onclick="activarBoton(this,'grupoLed');enviarComando('LED_ON')">ON</button>
+            <button class="btn-red" onclick="activarBoton(this,'grupoLed');enviarComando('LED_OFF')">OFF</button>
           </div>
         </div>
 
         <div class="bloquesControl">
           <img class="imgAct" src="img/humidificador.png" alt="humidificador">
-          <div>
+          <div id="grupoHumi">
             <h4>HUMIDIFICADOR</h4>
-            <button class="btn-green" onclick="enviarComando('HUMI_ON')">ON</button>
-            <button class="btn-red" onclick="enviarComando('HUMI_OFF')">OFF</button>
+            <button class="btn-green" onclick="activarBoton(this,'grupoHumi');enviarComando('HUMI_ON')">ON</button>
+            <button class="btn-red" onclick="activarBoton(this,'grupoHumi');enviarComando('HUMI_OFF')">OFF</button>
           </div>
         </div>
 
         <div class="bloquesControl">
           <img class="imgAct" src="img/buzzer.png" alt="buzzer">
-          <div>
-            <h4>BUZZER</h4>
-            <button class="btn-green" onclick="enviarComando('BUZZER_ON')">ON</button>
-            <button class="btn-red" onclick="enviarComando('BUZZER_OFF')">OFF</button>
+          <img class="imgAct" src="img/luz.png" alt="buzzer">
+      
+          <div id="grupoBuzzer1">
+            <h4>BUZZER (LUZ)</h4>
+            <button class="btn-green" onclick="activarBoton(this,'grupoBuzzer1');enviarComando('BUZZER1_ON')">ON</button>
+            <button class="btn-red" onclick="activarBoton(this,'grupoBuzzer1');enviarComando('BUZZER1_OFF')">OFF</button>
           </div>
         </div>
+        <div class="bloquesControl">
+          <img class="imgAct" src="img/buzzer.png" alt="buzzer">
+          <img class="imgAct" src="img/agua.png" alt="buzzer">
+          <div id="grupoBuzzer2">
+            <h4>BUZZER (AGUA)</h4>
+            <button class="btn-green" onclick="activarBoton(this,'grupoBuzzer2');enviarComando('BUZZER2_ON')">ON</button>
+            <button class="btn-red" onclick="activarBoton(this,'grupoBuzzer2');enviarComando('BUZZER2_OFF')">OFF</button>
+          </div>
+        </div>
+
       </div>
 
-      <div class="modo-actual">
-        <strong>Modo actual:</strong> <span id="modo">--</span>
-      </div>
+
     </section>
 
     <section class="contenido">
