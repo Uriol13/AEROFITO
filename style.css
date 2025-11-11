@@ -76,6 +76,7 @@ h1 {
 .modo-actual {
   margin-top: 15px;
   color: #fff;
+  font-style: oblique;
 }
 
 button {
@@ -93,6 +94,30 @@ button {
 .btn-yellow:hover { background: #d4ac0d; }
 .btn-red { background: var(--rojo); color: #fff; }
 .btn-red:hover { background: #c0392b; }
+
+
+button.active {
+  border: 2px solid #2ecc71;
+  background-color: #a3f0c4;
+}
+
+#btnManual.active {
+  border: 2px solid #ccc12e;
+  background-color: #f0eca3;
+}
+
+.btn-red.active{
+  border: 2px solid #cc2e2e;
+  background-color: #f0a3a3;
+}
+
+
+
+
+
+
+
+
 
 .contenido {
   flex: 3;
@@ -117,7 +142,7 @@ button {
 
 .sensor-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
 .sensor-card {
@@ -130,7 +155,9 @@ button {
   transition: transform 0.2s;
 }
 .sensor-card:hover {
-  transform: translateY(-5px);
+  /*transform: translateY(-5px);*/
+  transform: scale(1.03);
+  box-shadow: 0 4px 16px rgba(0, 255, 127, 0.3);  
 }
 .label {
   font-size: 18px;
@@ -144,6 +171,5 @@ button {
 }
 canvas {
   width: 100% !important;
-  height: 160px !important;
+  height: 300px !important;
 }
-
